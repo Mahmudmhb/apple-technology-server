@@ -32,7 +32,40 @@ async function run() {
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
     const categoryCollection = client.db("AppleDB").collection('category')
     const productsCollection = client.db('AppleDB').collection('addProducts')
+    const addToCartCollection = client.db('AppleDB').collection('cartContainer')
 
+
+    app.post('/addtoCart', async(req, res)=>{
+      const addCart = req.body
+      // console.log('hittig body',addtoCart)
+      const cart = await addToCartCollection.insertOne(addCart)
+      res.send(cart)
+    })
+
+    app.get('/addtoCart', async (req, res)=>{
+      const totalAddtoCart = await addToCartCollection.find().toArray()
+      res.send(totalAddtoCart)
+    })
+    app.get('/addtoCart/:id', async(req, res)=>{
+      const id = req.params.id
+      console.log('finding data', id)
+      const data = { _id: (id)}
+      console.log('need data', data)
+      const result = await addToCartCollection.findOne(data)
+      console.log(result)
+      res.send(result)
+
+
+     
+    })
+    app.delete('/addtoCart/:id', async(req, res)=>{
+      const id = req.params.id;
+      // console.log(id)
+      const query  = {_id: (id)}
+      const result = await addToCartCollection.deleteOne(query )
+      res.send(result)
+      console.log(result)
+    })
 app.get('/products', async(req, res)=>{
     const cursor = await productsCollection.find().toArray()
     res.send(cursor)
@@ -40,7 +73,7 @@ app.get('/products', async(req, res)=>{
 })
 app.get('/products/:id', async(req, res)=>{
   const id = req.params.id
-  console.log(id)
+  // console.log(id)
   const query = { _id: new ObjectId(id)}
    const product = await productsCollection.findOne(query)
    console.log(product)
